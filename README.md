@@ -1,5 +1,5 @@
 # PROBA-V-3DWDSR
-Easy and fast method that achieved on 02-02-2020 first place with a score of 0.94625 in Post Mortem Proba-V Super Resolution competition.
+Easy, fast and low on resources method that achieved on 02-02-2020 first place with a score of 0.94625 in Post Mortem Proba-V Super Resolution competition.
 
 # Requirements
 ```python
@@ -24,6 +24,11 @@ python dataset/preprocessing.py --pickles-dir <pickle-dataset> \
 ```
 
 ## Training
+
+The training was done in a computer with **32GB RAM** and a **GTX1050** with **4GB** of memory. If you have better specs you can adjust batch size, number of frames per images and network layers to improve the results. 
+
+Trained models are saved on **ckpt** dir.
+
 ```sh
 python train.py --band NIR \ 
                 --x-patches-file dataset_NIR_X_patches.npy \
@@ -71,14 +76,16 @@ The problem was treated as a Video Super Resolution problem because it has a lot
 - Many LR frames to generate one SR image
 - LR frames could be shifted by one pixel  (Similar to motion in Video frames)
 
-Taking these things into account, 3D Conv layers could take advantage of the temporal dimension and small variations in frame position. That's the idea behind 3DSRnet. But 3DSRnet uses vanilla 3DConvs as building blocks and a residual path with a Bicubic interpolation.
+Taking these things into account, 3D Conv layers could take advantage of the temporal dimension and small variations in frame position. That's the idea behind 3DSRnet. But 3DSRnet uses vanilla 3DConvs as building blocks and a residual path with a Bicubic interpolation as shown in the image below.
 
 ![alt text](images/3DSRnet.png "3DSRnet framework. Image from original paper (2)")
 
-## Replacing blocks
-As stated in [(1)](https://arxiv.org/abs/1808.08718), WDSR is an architecture that can improve the EDSR performance keeping a low number of parameters to train. That's why I think that a 3D adaptation of its building blocks could be a great fit to the 3DSRnet framework. Also, WDSR uses as a residual path the original LR frame and a Conv applied to it. I followed the same idea, and replaced the bicubic residual path with a 2DConv applied to the image's frames mean.
+Here I propose an improvement replacing those blocks with wdsr-b blocks.
 
-So, the final architecture of 3DWDSRnet looks like the image above but replacing the Bicubic Upsampling by 3DConvs and 3D-CNN Feature Extraction by WDSR-B blocks. At the end of the main and residual paths a PixelShift was used to reconstruct the HR frame.
+## Replacing blocks
+As stated in [(1)](https://arxiv.org/abs/1808.08718), WDSR is an architecture that can improve the EDSR performance keeping a low number of parameters to train. That's why I thought that a 3D adaptation of its building blocks could be a great fit to the 3DSRnet framework. Also, WDSR uses as a residual path the original LR frame and a Conv applied to it. I followed the same idea, and replaced the bicubic residual path with a 2DConv applied to the image's frames mean.
+
+So, the final architecture of 3DWDSRnet looks like the image above but replacing the Bicubic Upsampling by 3DConvs and 3D-CNN Feature Extraction by WDSR-B blocks. At the end of the main and residual paths PixelShift layers were used to reconstruct the HR frame.
 
 The proposed architecture was implemented in TensorFlow 2.0.
 
@@ -100,9 +107,9 @@ wdsr_3d(img_inputs, mean_intputs):
     for i in range(n): #n is the number of wdsr blocks
         x = wdsr_b_block(x)
          
-    # Residual path
     x = PixelShift(x) # upsample LR to HR
    
+    # Residual path
     y = PixelShift(mean_inputs) # upsample mean_inputs by conv2D
 
     return y+x
@@ -123,42 +130,58 @@ The dataset is formed by two kinds of images: NIR and RED. Both of them contains
 
 The preprocessing steps were performed as follows:
 
-- Register all frames from each image to the corresponding first frame
-- Remove images where all its frames had more than 15% dirty pixels
-- Select K best frames (from cleanest to dirtiest)
+- Register all frames from each image to the corresponding first frame using skimage 
+- Remove images where all of their frames had more than 15% dirty pixels
+- Select K best frames (from cleanest to dirtiest) (k=7)
 
 # Training
 
 ## Image patches
-Several approaches were tried to train the network as stated in the Introduction section table. Full image training (128x128), different kind of blocks (vanilla Conv3d instead of wdsr-blocks) and number of filters (16,32,64). But none of them worked as good as the full wdsr-blocks architecture working with reduced image size (34x34 to 96x96).
+Several approaches were tried to train the network as stated in the Introduction section table. Full image training (128x128), different kind of blocks (vanilla Conv3d instead of wdsr-blocks) and number of filters (16,32,64). But none of them worked as good as the full wdsr-blocks architecture with reduced image size (34x34 to 96x96).
 
-For each LR (128x128) image, 16 patches were taken, each one having a size of 34x34 strided by 32x32 pixels. I choose those extra pixels in patches to guarantee that no pixel was lost by means of a pixel shift in different frames.
+For each LR (128x128) image, 16 patches were taken, each one having a size of 34x34 strided by 32x32 pixels. I chose those extra pixels in patches to guarantee that no pixel was lost by means of a pixel shift.
 
-After taking the 16 patches per image a frame shuffling was applied. Converting 16 patches into 80 (shuffling 5 times frames position in each image). Again, by doing so, performance improve because more details could be captured by the network.
+After taking the 16 patches per image a frame shuffling was applied. Converting 16 patches into 96 (shuffling 6 times frames position for each image). Again, by doing so, performance was improved because more details could be captured by the network.
 
-After doing so, patches were HR mask had more than 15% dirty pixels were also removed.
+After doing so, patches where HR mask had more than 15% dirty pixels were also removed.
 
 ## NIR and RED models
 First, NIR band was trained using 32 channels, 8 residual wdsr-b blocks with expansion 6.
 
-After a plateau was reached the model was saved and used to start the RED band model.
-
+After a plateau was reached the model was saved and used to start the RED band model training.
 
 
 ## Loss Function
 Because of possible pixel shifts within the LR frames and the HR frames the loss function had to be reimplemented.
 Based on [DeepSUM (3)](https://arxiv.org/abs/1907.06490) I rewrote the losses to take into account all possible pixel shifts and select the minimum.
 
-Based on [Loss Functions for Image Restoration](https://arxiv.org/abs/1511.08861) several loss functions were tried: MSE, l1, MM-SIMD and Charbonnier. The best PSNR performance was found using l1.
+Following [Loss Functions for Image Restoration](https://arxiv.org/abs/1511.08861) approach several loss functions were tried: MSE, l1, MM-SIMD and Charbonnier. The best PSNR performance was found using l1.
 
 ## Optimizer
-Nadam optimizer was used using `lr=5e-5`.
+Nadam optimizer was used with a learning rate of `5e-5`.
 
 # Evaluation
 
-Because the proposed network is patch based, evaluation should be done by selecting 16 34x34 patches for each test image and feeding them to the network. Then, predictions should be reconstructed by merging resulting HR patches.
+Because the proposed network is patch based, evaluation should be done by selecting 16 34x34 patches for each test image and feeding them into the network. Then, predictions should be reconstructed by merging resulting HR patches.
 
-With these final reconstructed HR images  
+ # Citation
+If you want to use this repo you can cite it:
+```bibtext
+@misc{francisco_dorr_2020_3634101,
+    author       = {Francisco Dorr},
+    title        = {{3DWDSR: Multiframe Super Resolution Framework applied
+                    to PROBA-V challenge}},
+    month        = feb,
+    year         = 2020,
+    doi          = {10.5281/zenodo.3634101},
+    version      = {1.0},
+    publisher    = {Zenodo},
+    url          = {https://doi.org/10.5281/zenodo.3634101}
+    }
+```
+
+
+[![DOI](https://zenodo.org/badge/236830541.svg)](https://zenodo.org/badge/latestdoi/236830541)
 
 
 
