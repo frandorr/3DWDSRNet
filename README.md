@@ -12,6 +12,12 @@ tqdm
 ```
 
 # Usage
+## Preprocessing
+```sh
+python dataset/dataset_to_pickle.py --base-dir probav_data \
+                                    --out-dir dataset \
+                                    --band NIR
+```
 
 ## Training
 ```sh
