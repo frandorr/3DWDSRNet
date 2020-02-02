@@ -1,12 +1,12 @@
 # PROBA-V-3DWDSR
-Easy and fast method that achieves first place (0.94625) in Post Mortem Proba-V Super Resolution competition.
+Easy and fast method that achieved on 02-02-2020 first place with a score of 0.94625 in Post Mortem Proba-V Super Resolution competition.
 
 # Requirements
 ```python
-tensorflow=2,
+tensorflow=2.0.1
 tensorflow-addons=0.5.2
-scikit-image=0.15,
-numpy,
+scikit-image=0.15
+numpy
 matplotlib
 tqdm
 ```
@@ -17,6 +17,10 @@ tqdm
 python dataset/dataset_to_pickle.py --base-dir probav_data \
                                     --out-dir dataset \
                                     --band NIR
+
+python dataset/preprocessing.py --pickles-dir <pickle-dataset> \
+                                --band NIR \
+                                --output <patches-output>
 ```
 
 ## Training
