@@ -58,7 +58,7 @@ def predict(band, patches_file, merged_patches_file,checkpoint_dir, output):
     except:
         raise ValueError("Band should be RED or NIR")
 
-    k = 7
+
     logging.info('Loading test patches...')
     X_test_patches = np.load(patches_file, allow_pickle=True)
     X_test_merged_patches = np.load(merged_patches_file, allow_pickle=True)
