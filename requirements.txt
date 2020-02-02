@@ -1,0 +1,6 @@
+click
+tensorflow-gpu==2.0
+tensorflow-addons==0.5
+numpy
+scikit-image
+matplotlib
