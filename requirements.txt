@@ -1,5 +1,5 @@
 click
-tensorflow-gpu==2.0
+tensorflow-gpu==2.0.1
 tensorflow-addons==0.5
 numpy
 scikit-image
