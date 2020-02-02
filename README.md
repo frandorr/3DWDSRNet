@@ -21,8 +21,8 @@ As a briefly start I want to enumerate the steps I follow to reach the final sol
 | 3DWDSRnet | Full Image   | 3~8 |16,32,64  | mMSE  | Weight  |~0.98  |
 | 3DWDSRnet | Patches 34x34  | 8 | 32,64  | mL1  | Weight  |~0.97  |
 | 3DWDSRnet | Augmented Patches 34x34, 5 frames | 8 | 32  | mL1  | Weight  |~0.96  |
-| 3DWDSRnet | Augmented Patches 34x34, 7 frames | 8 | 32  | mL1  | Weight  |~0.96  |
-| 3DWDSRnet | Augmented Patches 34x34, 9 frames | 8 | 32  | mL1  | Weight  |~0.95  |
+| 3DWDSRnet | Augmented Patches 34x34, 7 frames | 8 | 32  | mL1  | Weight  |~0.946  |
+
 
 
 In the next section I'll explain only the final network.
