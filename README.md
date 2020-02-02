@@ -1,5 +1,5 @@
 # PROBA-V-3DWDSR
-Easy and fast method that achieves good results (0.96422) in Proba-V Super Resolution competition.
+Easy and fast method that achieves first place (0.94625) in Post Mortem Proba-V Super Resolution competition.
 
 # Requirements
 ```python
