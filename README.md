@@ -1,5 +1,9 @@
 # PROBA-V-3DWDSR
+
 Easy, fast and low on resources method that achieved on 02-02-2020 first place with a score of 0.94625 in [Post Mortem Proba-V Super Resolution competition](https://kelvins.esa.int/proba-v-super-resolution-post-mortem/leaderboard/).
+
+## Update 15-03-2020
+- I'm happy to announce https://github.com/mmbajo/PROBA-V scored higher (0.9416) in the leaderboard by using and improving this method. Congratulations!  
 
 # Requirements
 ```python
