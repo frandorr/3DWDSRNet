@@ -1,6 +1,7 @@
 click
 tensorflow-gpu==2.0.1
 tensorflow-addons==0.5
+scikit-image=0.15
 numpy
-scikit-image
 matplotlib
+tqdm
