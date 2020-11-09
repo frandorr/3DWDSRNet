@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-from skimage.feature import masked_register_translation
+from skimage.registration import phase_cross_correlation
 from scipy import ndimage as ndi
 import os
 import glob
@@ -29,7 +29,7 @@ def load_data(pickles_dir, band):
         pickles_dir, f'LR_test_{band}.npy'), allow_pickle=True)
     masks_LR_test = np.load(os.path.join(
         pickles_dir, f'LR_mask_{band}_test.npy'), allow_pickle=True)
-
+    print(type(masks_LR_test))
     # transform in a list of numpy
     imgs_LR = np.array([np.array(x) for x in imgs_LR])
     masks_LR = np.array([np.array(x) > 0 for x in masks_LR])
@@ -74,7 +74,7 @@ def extract_image_patches(ksize_rows, ksize_cols, strides_rows, strides_cols,ima
 
 def register_frame(frame, mask, reference):
 
-    detected_shift = masked_register_translation(reference, frame, mask)
+    detected_shift = phase_cross_correlation(reference, frame, reference_mask=mask)
     shifted_frame = ndi.shift(frame, detected_shift, mode='reflect')
     shifted_mask = ndi.shift(mask, detected_shift, mode='constant', cval=0)
     return shifted_frame, shifted_mask
@@ -138,7 +138,7 @@ import click
 def preprocess(pickles_dir=None, band='NIR', k=7, augment_n=6, output=None):
     train_ds, test_ds = load_data(pickles_dir, band)
 
-    logging.info('Registering train imgs...')
+    # logging.info('Registering train imgs...')
     reg_X = []
     for i, img in enumerate(tqdm(train_ds[0])):
         reg_X.append(register_frames_to_ref(img, train_ds[1][i]))
@@ -181,16 +181,16 @@ def preprocess(pickles_dir=None, band='NIR', k=7, augment_n=6, output=None):
     res = list(zip(*[augment_patch(x, y, y_mask, augment_n)
                      for x, y, y_mask in tqdm(train_ds)]))
 
-    # Reshape to original shape
+    # # Reshape to original shape
     X_train = np.ma.array(res[0]).reshape(ori_shape*(augment_n+1),7,128,128)
     y_train = np.ma.array(res[1]).reshape(ori_shape*(augment_n+1),384,384)
     y_train_mask = np.ma.array(res[2]).reshape(ori_shape*(augment_n+1),384,384)
 
-    # Take frames mean to use as residual path in network
+    # # Take frames mean to use as residual path in network
     X_train_merged = np.mean(X_train.data,axis=1)
     X_test_merged =np.mean(X_test.data,axis=1)
 
-    # Reshape to channels last, needed for the net
+    # # Reshape to channels last, needed for the net
     X_train_reshaped = np.asarray([np.moveaxis(x[:,:,:],0,-1) for x in X_train])
     y_train_reshaped = np.asarray(y_train)
     X_test_reshaped = np.asarray([np.moveaxis(x[:,:,:],0,-1) for x in X_test])
@@ -210,7 +210,7 @@ def preprocess(pickles_dir=None, band='NIR', k=7, augment_n=6, output=None):
     y_train_reshaped = y_train_reshaped.astype(np.float32)
     X_test_reshaped = X_test_reshaped.astype(np.float32)
 
-    logging.info('Saving before extract patches...')
+    # logging.info('Saving before extract patches...')
     np.save(os.path.join(output,f'dataset_{band}_X_train_aug_full.npy'),X_train_reshaped, allow_pickle=True)
     np.save(os.path.join(output,f'dataset_{band}_X_train_merged_aug_full.npy'),X_train_merged, allow_pickle=True)
     np.save(os.path.join(output,f'dataset_{band}_y_train_aug_full.npy'),y_train_reshaped, allow_pickle=True)
