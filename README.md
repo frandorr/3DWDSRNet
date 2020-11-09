@@ -7,9 +7,11 @@ Easy, fast and low on resources method that achieved on 02-02-2020 first place w
 
 # Requirements
 ```python
-tensorflow=2.0.1
-tensorflow-addons=0.5.2
-scikit-image=0.15
+click
+tensorflow
+tensorflow-addons
+scikit-image
+pandas
 numpy
 matplotlib
 tqdm
