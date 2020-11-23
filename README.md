@@ -164,7 +164,7 @@ Based on [DeepSUM (3)](https://arxiv.org/abs/1907.06490) I rewrote the losses to
 Following [Loss Functions for Image Restoration](https://arxiv.org/abs/1511.08861) approach several loss functions were tried: MSE, l1, MM-SIMD and Charbonnier. The best PSNR performance was found using l1.
 
 ## Optimizer
-Nadam optimizer was used with a learning rate of `5e-5`.
+Nadam optimizer was used with a learning rate of `5e-4`.
 
 # Evaluation
 
