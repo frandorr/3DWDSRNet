@@ -1,5 +1,21 @@
-# 3DWDSRNet
+This repository contains the code to reproduce [Satellite Image Multi-Frame Super Resolution Using 3D Wide-Activation Neural Networks](https://www.mdpi.com/2072-4292/12/22/3812) article. 
 
+ # Citation
+If you want to use this repo please cite:
+```bibtext
+@article{dorr2020satellite,
+  title={Satellite Image Multi-Frame Super Resolution Using 3D Wide-Activation Neural Networks},
+  author={Dorr, Francisco},
+  journal={Remote Sensing},
+  volume={12},
+  number={22},
+  pages={3812},
+  year={2020},
+  publisher={Multidisciplinary Digital Publishing Institute}
+}
+```
+
+# 3DWDSRNet
 Easy, fast and low on resources method that achieved on 02-02-2020 first place with a score of 0.94625 in [Post Mortem Proba-V Super Resolution competition](https://kelvins.esa.int/proba-v-super-resolution-post-mortem/leaderboard/).
 
 ## Update 15-03-2020
@@ -169,27 +185,6 @@ Nadam optimizer was used with a learning rate of `5e-4`.
 # Evaluation
 
 Because the proposed network is patch based, evaluation should be done by selecting 16 34x34 patches for each test image and feeding them into the network. Then, predictions should be reconstructed by merging resulting HR patches.
-
- # Citation
-If you want to use this repo you can cite it:
-```bibtext
-@misc{francisco_dorr_2020_3634101,
-    author       = {Francisco Dorr},
-    title        = {{3DWDSR: Multiframe Super Resolution Framework applied
-                    to PROBA-V challenge}},
-    month        = feb,
-    year         = 2020,
-    doi          = {10.5281/zenodo.3634101},
-    version      = {1.0},
-    publisher    = {Zenodo},
-    url          = {https://doi.org/10.5281/zenodo.3634101}
-    }
-```
-
-
-[![DOI](https://zenodo.org/badge/236830541.svg)](https://zenodo.org/badge/latestdoi/236830541)
-
-
 
 
 
